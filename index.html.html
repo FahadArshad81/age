@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChronoMeterX - Advanced Age Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&family=Poppins:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: 95%;
+      max-width: 600px;
+      color: #fff;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #fff;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
+    }
+
+    input[type="date"] {
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      width: 100%;
+      font-size: 16px;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+    }
+
+    button {
+      background: linear-gradient(to right, #ff6a00, #ee0979);
+      border: none;
+      padding: 14px 24px;
+      color: white;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #ee0979, #ff6a00);
+    }
+
+    .result {
+      text-align: left;
+      padding-top: 20px;
+    }
+
+    .result p {
+      font-size: 17px;
+      margin: 8px 0;
+      color: #fff;
+    }
+
+    .progress {
+      background-color: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 10px;
+      height: 18px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #00ff99;
+      width: 0%;
+      transition: width 1s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🌌 ChronoMeterX</h1>
+    <input type="date" id="dob" />
+    <button onclick="calculateDetails()">Calculate My Life Stats</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculateDetails() {
+      const dobValue = document.getElementById("dob").value;
+      const result = document.getElementById("result");
+      if (!dobValue) {
+        result.innerHTML = "<p>Please select your date of birth.</p>";
+        return;
+      }
+
+      const birthDate = new Date(dobValue);
+      const today = new Date();
+
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      let days = today.getDate() - birthDate.getDate();
+
+      if (days < 0) {
+        months--;
+        const daysInPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        days += daysInPrevMonth;
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+      const totalWeeks = Math.floor(totalDays / 7);
+      const totalHours = totalDays * 24;
+      const totalMinutes = totalHours * 60;
+      const totalSeconds = totalMinutes * 60;
+
+      const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+      if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1);
+      const daysUntilNextBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+
+      const dayBorn = birthDate.toLocaleString('default', { weekday: 'long' });
+
+      const zodiac = getZodiacSign(birthDate.getDate(), birthDate.getMonth() + 1);
+      const chineseZodiac = getChineseZodiac(birthDate.getFullYear());
+
+      const lifeExpectancy = 80;
+      const lifeProgress = Math.min(100, Math.floor((years / lifeExpectancy) * 100));
+
+      result.innerHTML = `
+        <p><strong>👶 Born on:</strong> ${dayBorn}, ${birthDate.toDateString()}</p>
+        <p><strong>🌠 Western Zodiac:</strong> ${zodiac}</p>
+        <p><strong>🐉 Chinese Zodiac:</strong> ${chineseZodiac}</p>
+        <hr>
+        <p><strong>🎉 You are:</strong> ${years} years, ${months} months, ${days} days old</p>
+        <p><strong>📆 Total:</strong> ${totalDays} days | ${totalWeeks} weeks</p>
+        <p><strong>⏰ Time Alive:</strong> ${totalHours} hours | ${totalMinutes} minutes | ${totalSeconds.toLocaleString()} seconds</p>
+        <p><strong>🎂 Next Birthday In:</strong> ${daysUntilNextBirthday} days</p>
+        <p><strong>⏳ Life Progress (avg 80 yrs):</strong></p>
+        <div class="progress"><div class="progress-bar" style="width: ${lifeProgress}%;"></div></div>
+        <p>${lifeProgress}% of average lifespan used</p>
+      `;
+    }
+
+    function getZodiacSign(day, month) {
+      const signs = [
+        ["Capricorn", 20], ["Aquarius", 19], ["Pisces", 20],
+        ["Aries", 20], ["Taurus", 21], ["Gemini", 21],
+        ["Cancer", 23], ["Leo", 23], ["Virgo", 23],
+        ["Libra", 23], ["Scorpio", 22], ["Sagittarius", 21], ["Capricorn", 31]
+      ];
+      return day < signs[month - 1][1] ? signs[month - 1][0] : signs[month][0];
+    }
+
+    function getChineseZodiac(year) {
+      const animals = [
+        "Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
+        "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"
+      ];
+      return animals[year % 12];
+    }
+  </script>
+</body>
+</html>
